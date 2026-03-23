@@ -2,16 +2,20 @@ import { Router } from "express";
 import {
   createInterviewHandler,
   deleteInterviewHandler,
-  getInterview,
+  getInterviewByIdHandler,
+  getMyInterviewsHandler,
   listInterviews,
   updateInterviewHandler,
 } from "../controllers/interview.controller";
+import { requireUser } from "../middleware/requireUser";
+import { validate } from "../middleware/validate";
+import { createInterviewSchema } from "../schemas/interview.schema";
 
 const router = Router();
 
-router.get("/", listInterviews);
-router.get("/:id", getInterview);
-router.post("/", createInterviewHandler);
+router.get("/", requireUser, getMyInterviewsHandler);
+router.get("/:id",requireUser, getInterviewByIdHandler);
+router.post("/",requireUser,validate(createInterviewSchema), createInterviewHandler);
 router.patch("/:id", updateInterviewHandler);
 router.delete("/:id", deleteInterviewHandler);
 

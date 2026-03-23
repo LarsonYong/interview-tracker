@@ -1,54 +1,42 @@
 import { prisma } from "../lib/prisma";
+import { CreateInterviewInput } from "../schemas/interview.schema";
+import { InterviewStatus } from "@prisma/client";
 
-export async function getAllInterviews() {
-  return prisma.interview.findMany({
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+
+
+export async function createInterview(userId: number, input: CreateInterviewInput) {
+    return prisma.interview.create({
+        data:{
+            userId,
+            company: input.company,
+            role: input.role,
+            stage: input.stage,
+            status: input.status ?? InterviewStatus.active,
+            jobUrl: input.jobUrl,
+            salary: input.salary,
+            notes: input.notes,
+            interviewDate: input.interviewDate? new Date(input.interviewDate): undefined,
+        }
+    })
 }
 
-export async function getInterviewById(id: number) {
-  return prisma.interview.findUnique({
-    where: { id },
-  });
+export async function getMyInterviews(userId:number) {
+    const interviews = await prisma.interview.findMany({
+        where: {userId },
+        orderBy: {
+            createdAt: 'desc',
+        }
+    });
+    return interviews
 }
 
-export async function createInterview(data: {
-  company: string;
-  role: string;
-  location?: string;
-  notes?: string;
-}) {
-  return prisma.interview.create({
-    data,
-  });
-}
 
-export async function updateInterview(
-  id: number,
-  data: Partial<{
-    company: string;
-    role: string;
-    location: string;
-    notes: string;
-    status:
-      | "APPLIED"
-      | "PHONE_SCREEN"
-      | "TECH_SCREEN"
-      | "ONSITE"
-      | "OFFER"
-      | "REJECTED";
-  }>
-) {
-  return prisma.interview.update({
-    where: { id },
-    data,
-  });
-}
-
-export async function deleteInterview(id: number) {
-  return prisma.interview.delete({
-    where: { id },
-  });
+export async function getInterviewById(userId:number, interviewId: string) {
+    const interview = await prisma.interview.findFirst({
+        where: {
+            userId,
+            id: interviewId 
+        },
+    });
+    return interview
 }

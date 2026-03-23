@@ -1,60 +1,87 @@
 import { Request, Response, NextFunction } from "express";
 import {
   createInterview,
-  deleteInterview,
-  getAllInterviews,
   getInterviewById,
-  updateInterview,
+  getMyInterviews,
 } from "../services/interview.service";
 import {
   createInterviewSchema,
   updateInterviewSchema,
 } from "../schemas/interview.schema";
+import { prisma } from "../lib/prisma";
+import { Prisma } from "@prisma/client";
+import { logger } from "../lib/logger";
+import { AppError } from "../errors/AppError";
 
 export async function listInterviews(
   _req: Request,
   res: Response,
   next: NextFunction
 ) {
-  try {
-    const interviews = await getAllInterviews();
-    res.json(interviews);
-  } catch (error) {
-    next(error);
-  }
+
 }
 
-export async function getInterview(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
-  try {
-    const id = Number(req.params.id);
-    const interview = await getInterviewById(id);
+export async function getMyInterviewsHandler(
+    req: Request,
+    res: Response,
+    next: NextFunction
+){
+    try{
 
-    if (!interview) {
-      return res.status(404).json({ error: { message: "Interview not found" } });
+        const userId = req.user!.userId
+        logger.info({userId}, "Fetching user interviews")
+
+        const interviews = await getMyInterviews(userId)
+        logger.info({ count: interviews.length, userId }, "Fetched user interviews");
+        return res.status(200).json(interviews);
+
+    }catch(error){
+        next(error)
     }
-
-    res.json(interview);
-  } catch (error) {
-    next(error);
-  }
 }
+
+export async function getInterviewByIdHandler(
+    req: Request,
+    res: Response,
+    next: NextFunction
+){
+    try{
+
+        const userId = req.user!.userId
+        const interviewId = req.params.id as string
+        logger.info({ userId, interviewId },"fetching interview by id")
+
+        const interview = await getInterviewById(userId, interviewId)
+
+        if (!interview) {
+            logger.warn({ userId, interviewId }, "Interview not found");
+            throw new AppError("Interview not found", 404, "NOT_FOUND");
+        }
+
+        logger.info({ userId, interviewId }, "Fetched user intervew by id");
+        return res.status(200).json(interview);
+
+    }catch(error){
+        next(error)
+    }
+}
+
 
 export async function createInterviewHandler(
   req: Request,
   res: Response,
   next: NextFunction
-) {
-  try {
-    const parsed = createInterviewSchema.parse(req.body);
-    const interview = await createInterview(parsed);
-    res.status(201).json(interview);
-  } catch (error) {
-    next(error);
-  }
+) { 
+    try {
+        const userId = req.user!.userId
+        logger.info({userId, company:req.body.company, role: req.body.role}, "Creating interview")
+        const interview = await createInterview(userId,req.body);
+        logger.info({userId, interviewId: interview.id, company: interview.company,role:interview.role}, "Interveiw created");
+        return res.status(201).json(interview)
+
+    }catch(error){
+        return next(error)
+    }
 }
 
 export async function updateInterviewHandler(
@@ -62,14 +89,7 @@ export async function updateInterviewHandler(
   res: Response,
   next: NextFunction
 ) {
-  try {
-    const id = Number(req.params.id);
-    const parsed = updateInterviewSchema.parse(req.body);
-    const interview = await updateInterview(id, parsed);
-    res.json(interview);
-  } catch (error) {
-    next(error);
-  }
+
 }
 
 export async function deleteInterviewHandler(
@@ -77,11 +97,5 @@ export async function deleteInterviewHandler(
   res: Response,
   next: NextFunction
 ) {
-  try {
-    const id = Number(req.params.id);
-    await deleteInterview(id);
-    res.status(204).send();
-  } catch (error) {
-    next(error);
+
   }
-}
