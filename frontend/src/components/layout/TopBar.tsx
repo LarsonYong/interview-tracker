@@ -3,11 +3,13 @@ import { Plus, Search, SunMedium } from "lucide-react";
 type TopBarProps = {
   title?: string;
   subtitle?: string;
+  onAddInterview?: () => void;
 };
 
 export default function TopBar({
   title = "Dashboard",
   subtitle,
+  onAddInterview,
 }: TopBarProps) {
   return (
     <header className="flex flex-col gap-4 px-6 py-6 lg:flex-row lg:items-center lg:justify-between">
@@ -36,10 +38,13 @@ export default function TopBar({
           <span>Sunny · 61°F</span>
         </div>
 
-        <button className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-slate-900 px-5 text-sm font-medium text-white shadow-[0_8px_20px_rgba(15,23,42,0.16)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_12px_24px_rgba(15,23,42,0.18)]">
-          <Plus className="h-4 w-4" />
-          Add Interview
-        </button>
+      <button
+        onClick={() => onAddInterview?.()}
+        className="inline-flex h-11 items-center justify-center gap-2 rounded-2xl bg-slate-900 px-5 text-sm font-medium text-white shadow-[0_8px_20px_rgba(15,23,42,0.16)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_12px_24px_rgba(15,23,42,0.18)]"
+      >
+        <Plus className="h-4 w-4" />
+        Add Interview
+      </button>
       </div>
     </header>
   );

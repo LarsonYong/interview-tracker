@@ -4,6 +4,9 @@ import { defineConfig } from "@prisma/config"; // Ensure the '@' is there if usi
 
 export default defineConfig({
   schema: "prisma/schema.prisma",
+  migrations: {
+    seed: "tsx prisma/seed.ts",
+  },
   datasource: {
     // This tells Prisma: "Use the URL from .env, or fail if it's missing"
     url: process.env.DATABASE_URL,

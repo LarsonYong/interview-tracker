@@ -57,10 +57,10 @@ export default function InterviewCard({
         styles.interviewCard,
         styles.hoverLift,
         styles.focusRing,
-        "relative flex min-h-[220px] w-full cursor-pointer flex-col overflow-hidden"
+        "relative flex min-h-55 w-full cursor-pointer flex-col overflow-hidden"
       )}
     >
-      <div className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-white/45 to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-linear-to-b from-white/45 to-transparent" />
 
       <div className="relative flex items-start justify-between gap-4">
         <div className="min-w-0">

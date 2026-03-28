@@ -28,7 +28,7 @@ export default function DashboardPage() {
               ].map((item) => (
                 <div
                   key={item.label}
-                  className="rounded-[24px] border border-white/60 bg-white/70 p-5 backdrop-blur-xl"
+                  className="rounded-3xl border border-white/60 bg-white/70 p-5 backdrop-blur-xl"
                 >
                   <p className="text-xs text-slate-500">{item.label}</p>
                   <p className="mt-2 text-xl font-semibold text-slate-900">
