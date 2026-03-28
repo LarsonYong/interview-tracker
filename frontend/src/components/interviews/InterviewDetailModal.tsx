@@ -1,146 +1,259 @@
-import { cn } from "../../lib/cn";
-import { styles } from "../../lib/styles";
+import { createPortal } from "react-dom";
+import { AnimatePresence, motion } from "framer-motion";
 
 import type { Interview } from "../../features/interviews/types";
 import StatusBadge from "./StatusBadge";
 
-type Props = {
+type InterviewDetailModalProps = {
   interview: Interview | null;
   open: boolean;
   onClose: () => void;
 };
 
-function formatStage(stage?: string | null) {
-  if (!stage) return "—";
-  return stage.replaceAll("_", " ");
-}
+const spring = {
+  type: "spring" as const,
+  stiffness: 320,
+  damping: 34,
+  mass: 0.9,
+};
 
-function formatDate(date?: string | null) {
-  if (!date) return "—";
-  return new Date(date).toLocaleString();
-}
-
-function formatCurrency(value?: number | null) {
-  if (!value) return "—";
-  return `$${value.toLocaleString()}`;
-}
+const ease: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
 export default function InterviewDetailModal({
   interview,
   open,
   onClose,
-}: Props) {
-  if (!open || !interview) return null;
+}: InterviewDetailModalProps) {
+  if (typeof document === "undefined") return null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div
-        className="absolute inset-0 bg-black/20 backdrop-blur-sm"
-        onClick={onClose}
-      />
-
-      <div
-        className={cn(
-          styles.glassCard,
-          "relative z-10 w-full max-w-2xl p-6 md:p-7"
-        )}
-      >
-        <div className="flex items-start justify-between gap-4">
-          <div className="min-w-0">
-            <h2 className="text-xl font-semibold tracking-tight text-slate-900">
-              {interview.company}
-            </h2>
-            <p className="mt-1.5 text-sm text-slate-600">{interview.role}</p>
-          </div>
-
-          <button
+  return createPortal(
+    <AnimatePresence mode="wait">
+      {open && interview ? (
+        <div className="fixed inset-0 z-[999]">
+          <motion.button
+            type="button"
+            aria-label="Close modal overlay"
             onClick={onClose}
-            className={styles.ghostButton}
-          >
-            Close
-          </button>
-        </div>
+            initial={{ opacity: 0, backdropFilter: "blur(0px)" }}
+            animate={{ opacity: 1, backdropFilter: "blur(8px)" }}
+            exit={{ opacity: 0, backdropFilter: "blur(0px)" }}
+            transition={{ duration: 0.18, ease: "linear" }}
+            className="absolute inset-0 bg-black/8"
+          />
 
-        <div className="mt-5 flex items-center gap-2">
-          <span className={cn(styles.badgeBase, styles.badgeNeutral)}>
-            {formatStage(interview.stage)}
-          </span>
-
-          <StatusBadge status={interview.status} />
-        </div>
-
-        <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
-          <div className="rounded-2xl bg-white/55 px-4 py-4">
-            <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-slate-400">
-              Interview Date
-            </p>
-            <p className="mt-2 text-sm font-medium text-slate-700">
-              {formatDate(interview.interviewDate)}
-            </p>
-          </div>
-
-          <div className="rounded-2xl bg-white/55 px-4 py-4">
-            <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-slate-400">
-              Salary
-            </p>
-            <p className="mt-2 text-sm font-medium text-slate-700">
-              {formatCurrency(interview.salary)}
-            </p>
-          </div>
-
-          <div className="rounded-2xl bg-white/55 px-4 py-4 md:col-span-2">
-            <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-slate-400">
-              Job URL
-            </p>
-            {interview.jobUrl ? (
-              <a
-                href={interview.jobUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="mt-2 block break-all text-sm text-slate-700 underline decoration-slate-300 underline-offset-4"
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center p-6">
+            <div className="pointer-events-auto w-full max-w-6xl origin-center">
+              <motion.div
+                layoutId={`interview-card-${interview.id}`}
+                transition={{
+                  layout: spring,
+                }}
+                className="rounded-[28px] border border-white/60 bg-white/78 p-8 text-left shadow-[0_8px_24px_rgba(15,23,42,0.06)] md:p-10"
               >
-                {interview.jobUrl}
-              </a>
-            ) : (
-              <p className="mt-2 text-sm font-medium text-slate-400">—</p>
-            )}
-          </div>
+                <motion.div layout className="flex items-start justify-between gap-6 border-b border-white/45 pb-6">
+                  <motion.div layout className="min-w-0 space-y-2">
+                    <motion.p
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.14, delay: 0.04, ease }}
+                      className="text-[11px] font-medium uppercase tracking-[0.2em] text-slate-400"
+                    >
+                      Interview
+                    </motion.p>
 
-          <div className="rounded-2xl bg-white/55 px-4 py-4">
-            <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-slate-400">
-              Created
-            </p>
-            <p className="mt-2 text-sm font-medium text-slate-700">
-              {new Date(interview.createdAt).toLocaleDateString()}
-            </p>
-          </div>
+                    <motion.div layout className="space-y-1">
+                      <motion.h2
+                        layoutId={`interview-company-${interview.id}`}
+                        transition={{
+                          layout: spring,
+                        }}
+                        className="truncate text-2xl font-semibold tracking-tight text-slate-900"
+                      >
+                        {interview.company}
+                      </motion.h2>
 
-          <div className="rounded-2xl bg-white/55 px-4 py-4">
-            <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-slate-400">
-              Updated
-            </p>
-            <p className="mt-2 text-sm font-medium text-slate-700">
-              {new Date(interview.updatedAt).toLocaleDateString()}
-            </p>
+                      <motion.p
+                        layoutId={`interview-role-${interview.id}`}
+                        transition={{
+                          layout: spring,
+                        }}
+                        className="text-sm text-slate-600"
+                      >
+                        {interview.role}
+                      </motion.p>
+                    </motion.div>
+                  </motion.div>
+
+                  <motion.div layout className="flex items-start gap-3">
+                    <motion.div
+                      layoutId={`interview-status-${interview.id}`}
+                      transition={{
+                            layout: spring,
+                      }}
+                      className="shrink-0"
+                    >
+                      <StatusBadge status={interview.status} />
+                    </motion.div>
+                  </motion.div>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, y: 10, scale: 0.985 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 4, scale: 0.995 }}
+                  transition={{
+                    duration: 0.2,
+                    delay: 0.14,
+                    ease,
+                  }}
+                  className="origin-top"
+                >
+                  <div className="space-y-8 pt-7">
+                    <div className="grid grid-cols-1 gap-x-10 gap-y-6 sm:grid-cols-2 lg:grid-cols-3">
+                      <InfoRow label="Stage" value={formatStage(interview.stage)} />
+                      <InfoRow
+                        label="Interview Date"
+                        value={formatDateTime(interview.interviewDate)}
+                        muted={!interview.interviewDate}
+                      />
+                      <InfoRow
+                        label="Salary"
+                        value={formatSalary(interview.salary)}
+                        muted={interview.salary == null}
+                      />
+                      <InfoRow
+                        label="Job Link"
+                        value={formatUrlLabel(interview.jobUrl)}
+                        muted={!interview.jobUrl}
+                      />
+                      <InfoRow
+                        label="Created"
+                        value={formatDateTime(interview.createdAt)}
+                      />
+                      <InfoRow
+                        label="Last Updated"
+                        value={formatDateTime(interview.updatedAt)}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-slate-400">
+                        Notes
+                      </p>
+
+                      <div className="px-0.5 py-0.5">
+                        <p className="whitespace-pre-wrap text-sm leading-6 text-slate-600">
+                          {interview.notes?.trim() ? interview.notes : "No notes yet."}
+                        </p>
+                      </div>
+                    </div>
+
+                    {interview.jobUrl ? (
+                      <div className="space-y-2">
+                        <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-slate-400">
+                          Open Job Posting
+                        </p>
+
+                        <a
+                          href={interview.jobUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex max-w-full items-center text-sm font-medium text-slate-700 underline decoration-slate-300 underline-offset-4 transition hover:text-slate-900 hover:decoration-slate-500"
+                        >
+                          <span className="truncate">{interview.jobUrl}</span>
+                        </a>
+                      </div>
+                    ) : null}
+                  </div>
+
+                  <div className="mt-12 flex items-center justify-end gap-3 border-t border-white/45 pt-8">
+                    <button
+                      type="button"
+                      onClick={onClose}
+                      className="inline-flex h-11 items-center justify-center rounded-2xl border border-white/45 bg-white/50 px-4 text-sm font-medium text-slate-700 transition hover:bg-white/70 hover:text-slate-900"
+                    >
+                      Close
+                    </button>
+
+                    <button
+                      type="button"
+                      className="inline-flex h-11 items-center justify-center rounded-2xl bg-slate-900 px-5 text-sm font-medium text-white shadow-[0_8px_20px_rgba(15,23,42,0.16)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_12px_24px_rgba(15,23,42,0.18)]"
+                    >
+                      Edit
+                    </button>
+                  </div>
+                </motion.div>
+              </motion.div>
+            </div>
           </div>
         </div>
+      ) : null}
+    </AnimatePresence>,
+    document.body
+  );
+}
 
-        <div className="mt-6 rounded-2xl bg-white/50 px-4 py-4">
-          <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-slate-400">
-            Notes
-          </p>
-          <p className="mt-2 text-sm leading-7 text-slate-600">
-            {interview.notes || "—"}
-          </p>
-        </div>
+type InfoRowProps = {
+  label: string;
+  value: string;
+  muted?: boolean;
+};
 
-        <div className="mt-8 flex justify-end gap-3">
-          <button className={styles.secondaryButton} onClick={onClose}>
-            Close
-          </button>
-          <button className={styles.primaryButton}>Modify Interview</button>
-        </div>
-      </div>
+function InfoRow({ label, value, muted = false }: InfoRowProps) {
+  return (
+    <div className="space-y-1.5">
+      <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-slate-400">
+        {label}
+      </p>
+      <p
+        className={`text-sm font-medium ${
+          muted ? "text-slate-400" : "text-slate-700"
+        }`}
+      >
+        {value}
+      </p>
     </div>
   );
+}
+
+function formatStage(stage: string | null | undefined) {
+  if (!stage) return "—";
+
+  return stage
+    .toLowerCase()
+    .split("_")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
+function formatDateTime(value: string | null | undefined) {
+  if (!value) return "—";
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "—";
+
+  return date.toLocaleString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
+function formatSalary(value: number | null | undefined) {
+  if (value == null) return "—";
+  return `$${value.toLocaleString()}`;
+}
+
+function formatUrlLabel(value: string | null | undefined) {
+  if (!value) return "—";
+
+  try {
+    const url = new URL(value);
+    return url.hostname.replace("www.", "");
+  } catch {
+    return value;
+  }
 }

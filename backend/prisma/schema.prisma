@@ -34,7 +34,7 @@ model Interview {
   userId        Int
   company       String
   role          String
-  stage         String?
+  stage         InterviewStage?
   status        InterviewStatus   @default(active)
   jobUrl        String?
   salary        Int?

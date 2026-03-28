@@ -14,11 +14,13 @@ import InterviewCardGrid from "./InterviewCardGrid";
 type Props = {
   interviews: Interview[];
   onCardClick: (interview: Interview) => void;
+  selectedInterview: Interview | null;
 };
 
 export default function InterviewBoard({
   interviews,
   onCardClick,
+  selectedInterview,
 }: Props) {
   const [selectedStage, setSelectedStage] = useState<StageFilter>("ALL");
   const [selectedStatus, setSelectedStatus] = useState<StatusFilter>("ALL");
@@ -47,6 +49,7 @@ export default function InterviewBoard({
       <InterviewCardGrid
         interviews={filteredInterviews}
         onCardClick={onCardClick}
+        selectedInterview={selectedInterview}
       />
     </section>
   );
