@@ -70,6 +70,6 @@ export const styles = {
   ghostButton:
     "inline-flex h-10 items-center justify-center rounded-xl px-3 text-sm text-slate-600 hover:bg-slate-100/70",
 
-  input:
-    "h-11 w-full rounded-2xl border border-white/45 bg-white/62 px-4 text-sm text-slate-800 backdrop-blur-xl placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900/20",
-};
+input:
+  "h-12 w-full rounded-2xl border border-slate-200/80 bg-white/88 px-4 text-sm text-slate-800 shadow-[inset_0_1px_1px_rgba(255,255,255,0.7)] backdrop-blur-xl placeholder:text-slate-400 transition-[border,box-shadow,background-color] duration-200 hover:border-slate-300/80 hover:bg-white/92 focus:outline-none focus:border-slate-300 focus:bg-white focus:shadow-[0_0_0_4px_rgba(15,23,42,0.05)]",
+}

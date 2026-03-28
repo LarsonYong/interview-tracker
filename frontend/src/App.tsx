@@ -1,7 +1,11 @@
-// import DashboardPage from "./pages/DashboardPage.tsx";
-import InterviewsPage from "./pages/InterviewsPage.tsx";
+import { RouterProvider } from "react-router-dom";
+import { router } from "./app/router";
+import { AuthProvider } from "./features/auth/auth-provider";
 
 export default function App() {
-  // return <DashboardPage />;
-  return <InterviewsPage />;
+  return (
+    <AuthProvider>
+      <RouterProvider router={router} />
+    </AuthProvider>
+  );
 }

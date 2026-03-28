@@ -44,8 +44,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = useCallback(async (input: LoginInput) => {
     const response = await loginUser(input);
     setToken(response.token);
-    setUser(response.user);
-  }, []);
+    await refreshMe();
+  }, [refreshMe]);
 
   const logout = useCallback(() => {
     clearToken();

@@ -6,14 +6,14 @@ import type {
 } from "./types";
 
 export async function loginUser(input: LoginInput) {
-  return apiFetch<LoginResponse>("/users/login", {
+  return apiFetch<LoginResponse>("/api/users/login", {
     method: "POST",
     body: JSON.stringify(input),
   });
 }
 
 export async function getCurrentUser() {
-  return apiFetch<CurrentUserResponse>("/users/me", {
+  return apiFetch<CurrentUserResponse>("/api/users/me", {
     method: "GET",
   });
 }
