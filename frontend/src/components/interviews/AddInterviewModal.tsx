@@ -37,6 +37,7 @@ export default function AddInterviewModal({
     <AnimatePresence mode="wait">
       {open ? (
         <div className="fixed inset-0 z-999">
+          {/* Overlay */}
           <motion.button
             type="button"
             aria-label="Close modal overlay"
@@ -50,6 +51,7 @@ export default function AddInterviewModal({
 
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center p-6">
             <div className="pointer-events-auto w-full max-w-6xl origin-center">
+              {/* Modal */}
               <motion.div
                 initial={{ opacity: 0, scale: 0.97, y: 10 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -57,34 +59,18 @@ export default function AddInterviewModal({
                 transition={{ duration: 0.22, ease }}
                 className="rounded-[28px] border border-white/70 bg-white/88 p-8 text-left shadow-[0_16px_48px_rgba(15,23,42,0.08)] md:p-10"
               >
-                <div className="flex items-start justify-between gap-6 border-b border-white/55 pb-6">
-                  <div className="min-w-0 space-y-2">
-                    <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-slate-400">
-                      New Interview
-                    </p>
-
-                    <div className="space-y-1">
-                      <h2 className="truncate text-2xl font-semibold tracking-tight text-slate-900">
-                        Add Interview
-                      </h2>
-
-                      <p className="text-sm text-slate-600">
-                        Create a new interview entry.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="shrink-0">
-                    <button
-                      type="button"
-                      onClick={onClose}
-                      className="inline-flex h-11 items-center justify-center rounded-2xl border border-white/55 bg-white/72 px-4 text-sm font-medium text-slate-700 transition hover:bg-white hover:text-slate-900"
-                    >
-                      Close
-                    </button>
-                  </div>
+                <div className="mt-8 flex items-center justify-center border-b border-white/55 pb-7">
+                <motion.h2
+                    initial={{ opacity: 0, y: -4 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="text-[28px] font-semibold tracking-tight text-slate-900"
+                >
+                    Add Interview
+                </motion.h2>
                 </div>
 
+                {/* Content */}
                 <motion.div
                   initial={{ opacity: 0, y: 10, scale: 0.985 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}

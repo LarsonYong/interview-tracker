@@ -13,6 +13,8 @@ import { getMyInterviews } from "../features/interviews/api";
 
 import AddInterviewModal from "../components/interviews/AddInterviewModal";
 
+import EditInterviewModal from "../components/interviews/EditInterviewModal";
+
 export default function InterviewsPage() {
   const [selectedInterview, setSelectedInterview] = useState<Interview | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
@@ -21,6 +23,8 @@ export default function InterviewsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isAddOpen, setIsAddOpen] = useState(false);
+  // const [isEditOpen, setIsEditOpen] = useState(false)
+  const [editingInterview, setEditingInterview] = useState<Interview | null>(null);
 
   function handleOpenInterview(interview: Interview) {
     setSelectedInterview(interview);
@@ -79,6 +83,11 @@ export default function InterviewsPage() {
                   interview={selectedInterview}
                   open={isDetailOpen}
                   onClose={handleCloseInterview}
+                  onEditInterview={(interview) => {
+                    setEditingInterview(interview);
+                    setIsDetailOpen(false)
+                  
+                  }}
                 />
               </LayoutGroup>
             )}
@@ -86,12 +95,22 @@ export default function InterviewsPage() {
         </main>
       </div>
       <AddInterviewModal
-      open={isAddOpen}
-      onClose={() => setIsAddOpen(false)}
-      onSubmit={(values) => {
-        console.log("New interview:", values);
-      }}
-    />
+        open={isAddOpen}
+        onClose={() => setIsAddOpen(false)}
+        onSubmit={(values) => {
+          console.log("New interview:", values);
+        }}
+      />
+      <EditInterviewModal 
+        interview={editingInterview}
+        open = {!!editingInterview}
+        onClose={() => setEditingInterview(null)}
+        onSubmit={(values) => {
+          console.log("Edit interview", values)
+        }
+
+        }
+      />
     </AppShell>
   );
 }

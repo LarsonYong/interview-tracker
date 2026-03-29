@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import type {
   InterviewStage,
@@ -50,6 +50,10 @@ export default function InterviewForm({
   const [values, setValues] = useState<InterviewFormValues>(initialValues);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  useEffect(() => {
+    setValues(initialValues);
+  }, [initialValues])
+
   function updateField<K extends keyof InterviewFormValues>(
     key: K,
     value: InterviewFormValues[K]
@@ -74,13 +78,10 @@ export default function InterviewForm({
   return (
     <form onSubmit={handleSubmit}>
       <div className="space-y-8">
-        <section className="rounded-[24px] border border-white/60 bg-white/58 p-5 md:p-6">
+        <section className="rounded-3xl border border-white/60 bg-white/58 p-5 md:p-6">
           <div>
             <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-slate-400">
               Core Info
-            </p>
-            <p className="mt-2 text-sm text-slate-600">
-              Basic identity and interview state.
             </p>
           </div>
 
@@ -91,7 +92,7 @@ export default function InterviewForm({
                 required
                 value={values.company}
                 onChange={(e) => updateField("company", e.target.value)}
-                placeholder="e.g. Apple"
+                placeholder="Company name"
                 className={fieldClassName}
               />
             </FormField>
@@ -102,7 +103,7 @@ export default function InterviewForm({
                 required
                 value={values.role}
                 onChange={(e) => updateField("role", e.target.value)}
-                placeholder="e.g. Product Designer"
+                placeholder="Role or position"
                 className={fieldClassName}
               />
             </FormField>
@@ -141,13 +142,10 @@ export default function InterviewForm({
           </div>
         </section>
 
-        <section className="rounded-[24px] border border-white/60 bg-white/58 p-5 md:p-6">
+        <section className="rounded-3xl border border-white/60 bg-white/58 p-5 md:p-6">
           <div>
             <p className="text-[11px] font-medium uppercase tracking-[0.18em] text-slate-400">
               Details
-            </p>
-            <p className="mt-2 text-sm text-slate-600">
-              Add context and supporting information.
             </p>
           </div>
 
@@ -167,7 +165,7 @@ export default function InterviewForm({
                 min="0"
                 value={values.salary}
                 onChange={(e) => updateField("salary", e.target.value)}
-                placeholder="e.g. 180000"
+                placeholder="Estimated or offered compensation"
                 className={fieldClassName}
               />
             </FormField>
@@ -178,7 +176,7 @@ export default function InterviewForm({
                   type="url"
                   value={values.jobUrl}
                   onChange={(e) => updateField("jobUrl", e.target.value)}
-                  placeholder="https://..."
+                  placeholder="Link to the job posting"
                   className={fieldClassName}
                 />
               </FormField>
@@ -190,7 +188,7 @@ export default function InterviewForm({
                   value={values.notes}
                   onChange={(e) => updateField("notes", e.target.value)}
                   rows={5}
-                  placeholder="Add any useful context here..."
+                  placeholder="Notes, feedback, or anything worth remembering"
                   className={textareaClassName}
                 />
               </FormField>

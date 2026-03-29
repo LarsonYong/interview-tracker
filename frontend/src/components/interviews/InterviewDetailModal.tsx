@@ -8,6 +8,7 @@ type InterviewDetailModalProps = {
   interview: Interview | null;
   open: boolean;
   onClose: () => void;
+  onEditInterview?:(interview: Interview) => void
 };
 
 const spring = {
@@ -23,6 +24,7 @@ export default function InterviewDetailModal({
   interview,
   open,
   onClose,
+  onEditInterview,
 }: InterviewDetailModalProps) {
   if (typeof document === "undefined") return null;
 
@@ -174,6 +176,7 @@ export default function InterviewDetailModal({
                     </button>
 
                     <button
+                      onClick = {() => interview && onEditInterview?.(interview)}
                       type="button"
                       className="inline-flex h-11 items-center justify-center rounded-2xl bg-slate-900 px-5 text-sm font-medium text-white shadow-[0_8px_20px_rgba(15,23,42,0.16)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_12px_24px_rgba(15,23,42,0.18)]"
                     >
