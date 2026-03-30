@@ -9,7 +9,7 @@ import InterviewBoard from "../components/interviews/InterviewBoard";
 import InterviewDetailModal from "../components/interviews/InterviewDetailModal";
 
 import type { Interview } from "../features/interviews/types";
-import { getMyInterviews } from "../features/interviews/api";
+import { getMyInterviews, updateInterview } from "../features/interviews/api";
 
 import AddInterviewModal from "../components/interviews/AddInterviewModal";
 
@@ -105,11 +105,25 @@ export default function InterviewsPage() {
         interview={editingInterview}
         open = {!!editingInterview}
         onClose={() => setEditingInterview(null)}
-        onSubmit={(values) => {
-          console.log("Edit interview", values)
-        }
+        onSubmit={async(values) => {
+          if (!editingInterview) return;
 
+          const updatedInterview = await updateInterview(
+            editingInterview.id,
+            values
+          );
+
+
+          setInterviews((prev) =>
+            prev.map((interview) =>
+              interview.id === updatedInterview.id ? updatedInterview : interview
+            )
+          );
+          setSelectedInterview(updatedInterview);
+          setEditingInterview(null);
+          setIsDetailOpen(true);
         }
+      }
       />
     </AppShell>
   );

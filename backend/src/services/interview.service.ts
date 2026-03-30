@@ -1,6 +1,6 @@
 import { prisma } from "../lib/prisma";
-import { CreateInterviewInput } from "../schemas/interview.schema";
-import { InterviewStatus } from "@prisma/client";
+import { CreateInterviewInput, UpdateInterviewBodyInput } from "../schemas/interview.schema";
+import { InterviewStatus, InterviewStage } from "@prisma/client";
 
 
 
@@ -39,4 +39,65 @@ export async function getInterviewById(userId:number, interviewId: string) {
         },
     });
     return interview
+}
+
+
+export async function updateInterview(
+    userId: number,
+    interviewId: string,
+    input: UpdateInterviewBodyInput
+    ) {
+    const existingInterview = await prisma.interview.findFirst({
+        where: {
+            id: interviewId,
+            userId
+        },
+    });
+    if (!existingInterview){
+        return null;
+    }
+
+    const data = {
+    ...input,
+    interviewDate:
+        input.interviewDate === undefined
+        ? undefined
+        : input.interviewDate === null
+        ? null
+        : new Date(input.interviewDate),
+    };
+
+    const updatedInterview = await prisma.interview.update({
+        where:{
+            id: interviewId,
+        },
+        data,
+    })
+
+    return updatedInterview;
+}
+
+
+export async function deleteInterview(
+    userId: number,
+    interviewId: string
+) {
+    const existingInterview = await prisma.interview.findFirst({
+        where: {
+            id: interviewId,
+            userId
+        },
+    })
+
+    if (!existingInterview) {
+        return null;
+    }
+
+    await prisma.interview.delete({
+        where: {
+            id: interviewId
+        }
+    });
+
+    return {success: true}
 }
