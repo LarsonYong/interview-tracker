@@ -8,7 +8,9 @@ type EditInterviewModalProps = {
   interview: Interview | null;
   open: boolean;
   onClose: () => void;
-  onSubmit?: (values: InterviewFormValues) => void;
+  onSubmit?: (values: InterviewFormValues) => Promise<void> | void;
+  isSubmitting?: boolean;
+  errorMessage?: string | null;
 };
 
 const ease: [number, number, number, number] = [0.22, 1, 0.36, 1];
@@ -48,15 +50,15 @@ export default function EditInterviewModal({
   open,
   onClose,
   onSubmit,
+  isSubmitting = false,
+  errorMessage = null,
 }: EditInterviewModalProps) {
   if (typeof document === "undefined") return null;
   if (!interview) return null;
 
-  function handleSubmit(values: InterviewFormValues) {
-    onSubmit?.(values);
+  async function handleSubmit(values: InterviewFormValues) {
+    await onSubmit?.(values);
   }
-
-  
 
   return createPortal(
     <AnimatePresence mode="wait">
@@ -65,12 +67,13 @@ export default function EditInterviewModal({
           <motion.button
             type="button"
             aria-label="Close modal overlay"
-            onClick={onClose}
+            onClick={isSubmitting ? undefined : onClose}
+            disabled={isSubmitting}
             initial={{ opacity: 0, backdropFilter: "blur(0px)" }}
             animate={{ opacity: 1, backdropFilter: "blur(8px)" }}
             exit={{ opacity: 0, backdropFilter: "blur(0px)" }}
             transition={{ duration: 0.18, ease: "linear" }}
-            className="absolute inset-0 bg-black/6"
+            className="absolute inset-0 bg-black/6 disabled:cursor-not-allowed"
           />
 
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center p-6">
@@ -107,9 +110,11 @@ export default function EditInterviewModal({
                   <div className="pt-7">
                     <InterviewForm
                       initialValues={toFormValues(interview)}
-                      submitLabel="Save Changes"
+                      submitLabel={isSubmitting ? "Saving..." : "Save Changes"}
                       onCancel={onClose}
                       onSubmit={handleSubmit}
+                      isSubmitting={isSubmitting}
+                      errorMessage={errorMessage}
                     />
                   </div>
                 </motion.div>

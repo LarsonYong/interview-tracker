@@ -18,9 +18,11 @@ export type InterviewFormValues = {
 
 type InterviewFormProps = {
   initialValues: InterviewFormValues;
-  onSubmit: (values: InterviewFormValues) => void;
+  onSubmit: (values: InterviewFormValues) => Promise<void> | void;
   onCancel?: () => void;
   submitLabel?: string;
+  isSubmitting?: boolean;
+  errorMessage?: string | null;
 };
 
 const stageOptions: { label: string; value: InterviewStage }[] = [
@@ -46,13 +48,14 @@ export default function InterviewForm({
   onSubmit,
   onCancel,
   submitLabel = "Save",
+  isSubmitting = false,
+  errorMessage = null,
 }: InterviewFormProps) {
   const [values, setValues] = useState<InterviewFormValues>(initialValues);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     setValues(initialValues);
-  }, [initialValues])
+  }, [initialValues]);
 
   function updateField<K extends keyof InterviewFormValues>(
     key: K,
@@ -66,13 +69,7 @@ export default function InterviewForm({
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-
-    try {
-      setIsSubmitting(true);
-      await onSubmit(values);
-    } finally {
-      setIsSubmitting(false);
-    }
+    await onSubmit(values);
   }
 
   return (
@@ -197,24 +194,33 @@ export default function InterviewForm({
         </section>
       </div>
 
-      <div className="mt-12 flex items-center justify-end gap-3 border-t border-white/55 pt-8">
-        {onCancel ? (
-          <button
-            type="button"
-            onClick={onCancel}
-            className="inline-flex h-11 items-center justify-center rounded-2xl border border-white/55 bg-white/72 px-4 text-sm font-medium text-slate-700 transition hover:bg-white hover:text-slate-900"
-          >
-            Cancel
-          </button>
+      <div className="mt-12 border-t border-white/55 pt-8">
+        {errorMessage ? (
+          <div className="mb-4 rounded-2xl border border-rose-200/80 bg-rose-50/80 px-4 py-3 text-sm text-rose-700">
+            {errorMessage}
+          </div>
         ) : null}
 
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="inline-flex h-11 items-center justify-center rounded-2xl bg-slate-900 px-5 text-sm font-medium text-white shadow-[0_8px_20px_rgba(15,23,42,0.16)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_12px_24px_rgba(15,23,42,0.18)] disabled:opacity-60"
-        >
-          {isSubmitting ? "Saving..." : submitLabel}
-        </button>
+        <div className="flex items-center justify-end gap-3">
+          {onCancel ? (
+            <button
+              type="button"
+              onClick={onCancel}
+              disabled={isSubmitting}
+              className="inline-flex h-11 items-center justify-center rounded-2xl border border-white/55 bg-white/72 px-4 text-sm font-medium text-slate-700 transition hover:bg-white hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              Cancel
+            </button>
+          ) : null}
+
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="inline-flex h-11 items-center justify-center rounded-2xl bg-slate-900 px-5 text-sm font-medium text-white shadow-[0_8px_20px_rgba(15,23,42,0.16)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_12px_24px_rgba(15,23,42,0.18)] disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {submitLabel}
+          </button>
+        </div>
       </div>
     </form>
   );

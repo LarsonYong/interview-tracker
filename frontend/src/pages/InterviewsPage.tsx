@@ -7,13 +7,12 @@ import TopBar from "../components/layout/TopBar";
 
 import InterviewBoard from "../components/interviews/InterviewBoard";
 import InterviewDetailModal from "../components/interviews/InterviewDetailModal";
+import AddInterviewModal from "../components/interviews/AddInterviewModal";
+import EditInterviewModal from "../components/interviews/EditInterviewModal";
 
 import type { Interview } from "../features/interviews/types";
 import { getMyInterviews, updateInterview } from "../features/interviews/api";
-
-import AddInterviewModal from "../components/interviews/AddInterviewModal";
-
-import EditInterviewModal from "../components/interviews/EditInterviewModal";
+import type { InterviewFormValues } from "../components/interviews/InterviewForm";
 
 export default function InterviewsPage() {
   const [selectedInterview, setSelectedInterview] = useState<Interview | null>(null);
@@ -22,9 +21,12 @@ export default function InterviewsPage() {
   const [interviews, setInterviews] = useState<Interview[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
   const [isAddOpen, setIsAddOpen] = useState(false);
-  // const [isEditOpen, setIsEditOpen] = useState(false)
+
   const [editingInterview, setEditingInterview] = useState<Interview | null>(null);
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
+  const [editError, setEditError] = useState<string | null>(null);
 
   function handleOpenInterview(interview: Interview) {
     setSelectedInterview(interview);
@@ -33,6 +35,50 @@ export default function InterviewsPage() {
 
   function handleCloseInterview() {
     setIsDetailOpen(false);
+  }
+
+  function handleOpenEditInterview(interview: Interview) {
+    setEditError(null);
+    setEditingInterview(interview);
+    setIsDetailOpen(false);
+  }
+
+  function handleCloseEditInterview() {
+    if (isSavingEdit) return;
+
+    setEditingInterview(null);
+    setEditError(null);
+  }
+
+  async function handleUpdateInterview(values: InterviewFormValues) {
+    if (!editingInterview) return;
+
+    try {
+      setEditError(null);
+      setIsSavingEdit(true);
+
+      const updatedInterview = await updateInterview(editingInterview.id, values);
+
+      setInterviews((prev) =>
+        prev.map((interview) =>
+          interview.id === updatedInterview.id ? updatedInterview : interview
+        )
+      );
+
+      setSelectedInterview(updatedInterview);
+      setEditingInterview(null);
+      setIsDetailOpen(true);
+    } catch (error: unknown) {
+      console.error("Failed to update interview", error);
+
+      if (error instanceof Error) {
+        setEditError(error.message);
+      } else {
+        setEditError("Failed to save changes. Please try again.");
+      }
+    } finally {
+      setIsSavingEdit(false);
+    }
   }
 
   useEffect(() => {
@@ -83,17 +129,14 @@ export default function InterviewsPage() {
                   interview={selectedInterview}
                   open={isDetailOpen}
                   onClose={handleCloseInterview}
-                  onEditInterview={(interview) => {
-                    setEditingInterview(interview);
-                    setIsDetailOpen(false)
-                  
-                  }}
+                  onEditInterview={handleOpenEditInterview}
                 />
               </LayoutGroup>
             )}
           </div>
         </main>
       </div>
+
       <AddInterviewModal
         open={isAddOpen}
         onClose={() => setIsAddOpen(false)}
@@ -101,29 +144,14 @@ export default function InterviewsPage() {
           console.log("New interview:", values);
         }}
       />
-      <EditInterviewModal 
+
+      <EditInterviewModal
         interview={editingInterview}
-        open = {!!editingInterview}
-        onClose={() => setEditingInterview(null)}
-        onSubmit={async(values) => {
-          if (!editingInterview) return;
-
-          const updatedInterview = await updateInterview(
-            editingInterview.id,
-            values
-          );
-
-
-          setInterviews((prev) =>
-            prev.map((interview) =>
-              interview.id === updatedInterview.id ? updatedInterview : interview
-            )
-          );
-          setSelectedInterview(updatedInterview);
-          setEditingInterview(null);
-          setIsDetailOpen(true);
-        }
-      }
+        open={!!editingInterview}
+        onClose={handleCloseEditInterview}
+        isSubmitting={isSavingEdit}
+        errorMessage={editError}
+        onSubmit={handleUpdateInterview}
       />
     </AppShell>
   );
