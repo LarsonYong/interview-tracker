@@ -17,6 +17,6 @@ router.get("/", requireUser, getMyInterviewsHandler);
 router.get("/:id",requireUser, getInterviewByIdHandler);
 router.post("/",requireUser,validate(createInterviewSchema), createInterviewHandler);
 router.patch("/:id",requireUser, updateInterviewHandler);
-router.delete("/:id", deleteInterviewHandler);
+router.delete("/:id",requireUser, deleteInterviewHandler);
 
 export default router;

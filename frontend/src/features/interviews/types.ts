@@ -28,3 +28,14 @@ export interface Interview {
   createdAt: string;
   updatedAt: string;
 }
+
+export type InterviewFormValues = {
+  company: string;
+  role: string;
+  stage: InterviewStage;
+  status: InterviewStatus;
+  interviewDate: string;
+  salary: string;
+  jobUrl: string;
+  notes: string;
+};

@@ -15,12 +15,14 @@ type Props = {
   interviews: Interview[];
   onCardClick: (interview: Interview) => void;
   selectedInterview: Interview | null;
+  isDetailOpen: boolean;
 };
 
 export default function InterviewBoard({
   interviews,
   onCardClick,
   selectedInterview,
+  isDetailOpen,
 }: Props) {
   const [selectedStage, setSelectedStage] = useState<StageFilter>("ALL");
   const [selectedStatus, setSelectedStatus] = useState<StatusFilter>("ALL");
@@ -50,6 +52,7 @@ export default function InterviewBoard({
         interviews={filteredInterviews}
         onCardClick={onCardClick}
         selectedInterview={selectedInterview}
+        isDetailOpen={isDetailOpen}
       />
     </section>
   );

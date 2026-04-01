@@ -8,12 +8,14 @@ type InterviewCardGridProps = {
   interviews: Interview[];
   onCardClick: (interview: Interview) => void;
   selectedInterview: Interview | null;
+  isDetailOpen: boolean;
 };
 
 export default function InterviewCardGrid({
   interviews,
   onCardClick,
   selectedInterview,
+  isDetailOpen,
 }: InterviewCardGridProps) {
   if (interviews.length === 0) {
     return (
@@ -35,7 +37,7 @@ export default function InterviewCardGrid({
           key={interview.id}
           interview={interview}
           onClick={onCardClick}
-          isActive={selectedInterview?.id === interview.id}
+          isActive={isDetailOpen && selectedInterview?.id === interview.id}
         />
       ))}
     </div>

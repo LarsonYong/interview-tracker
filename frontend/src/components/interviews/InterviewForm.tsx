@@ -149,7 +149,7 @@ export default function InterviewForm({
           <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-5 md:grid-cols-2">
             <FormField label="Interview Date">
               <input
-                type="datetime-local"
+                type="date"
                 value={values.interviewDate}
                 onChange={(e) => updateField("interviewDate", e.target.value)}
                 className={fieldClassName}

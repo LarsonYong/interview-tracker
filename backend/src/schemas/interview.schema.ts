@@ -7,7 +7,7 @@ export const createInterviewSchema = z.object({
   role: z.string().trim().min(1, "role is required"),
   stage: z.nativeEnum(InterviewStage).optional(),
   status: z.nativeEnum(InterviewStatus).optional(),
-  jobUrl: z.url("jobUrl must be a valid URL").optional(),
+  jobUrl: z.url("jobUrl must be a valid URL").nullable().optional(),
   salary: z.number().int().positive().optional(),
   notes: z.string().optional(),
   interviewDate: z.string().datetime().optional(),
