@@ -86,7 +86,9 @@ function getMetaWithoutDuration(meta: unknown): unknown {
     return meta;
   }
 
-  const { duration, ...rest } = meta as Record<string, unknown>;
+  const rest = { ...(meta as Record<string, unknown>) };
+  delete rest.duration;
+
   return Object.keys(rest).length > 0 ? rest : null;
 }
 
@@ -131,7 +133,10 @@ function highlightText(text: string, query: string) {
 
 export function DevLogPanel() {
   const [isOpen, setIsOpen] = useState(true);
-  const [logs, setLogs] = useState<LogEntry[]>(() => logger.getLogs());
+  const [isPaused, setIsPaused] = useState(false);
+  const [logs, setLogs] = useState<LogEntry[]>(() =>
+    logger.getLogs().slice(-MAX_PANEL_LOGS)
+  );
   const [followLatest, setFollowLatest] = useState(true);
   const [unreadCount, setUnreadCount] = useState(0);
   const [levelFilter, setLevelFilter] = useState<LevelFilter>("all");
@@ -142,6 +147,11 @@ export function DevLogPanel() {
 
   useEffect(() => {
     const unsubscribe = logger.subscribe((entry) => {
+      if (isPaused) {
+        setUnreadCount((count) => count + 1);
+        return;
+      }
+
       setLogs((prev) => {
         const next = [...prev, entry];
         return next.length > MAX_PANEL_LOGS
@@ -155,7 +165,7 @@ export function DevLogPanel() {
     });
 
     return unsubscribe;
-  }, [followLatest]);
+  }, [followLatest, isPaused]);
 
   const scopes = useMemo(() => {
     const set = new Set<string>();
@@ -193,10 +203,10 @@ export function DevLogPanel() {
 
   useEffect(() => {
     const el = containerRef.current;
-    if (!el || !isOpen || !followLatest) return;
+    if (!el || !isOpen || !followLatest || isPaused) return;
 
     el.scrollTop = el.scrollHeight;
-  }, [filteredLogs, isOpen, followLatest]);
+  }, [filteredLogs, isOpen, followLatest, isPaused]);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -212,7 +222,7 @@ export function DevLogPanel() {
     const nearBottom = isNearBottom(el);
     setFollowLatest(nearBottom);
 
-    if (nearBottom) {
+    if (nearBottom && !isPaused) {
       setUnreadCount(0);
     }
   }
@@ -223,7 +233,10 @@ export function DevLogPanel() {
 
     el.scrollTop = el.scrollHeight;
     setFollowLatest(true);
-    setUnreadCount(0);
+
+    if (!isPaused) {
+      setUnreadCount(0);
+    }
   }
 
   function handleClear() {
@@ -243,6 +256,20 @@ export function DevLogPanel() {
     });
   }
 
+  function handleResume() {
+    const latestLogs = logger.getLogs().slice(-MAX_PANEL_LOGS);
+    setLogs(latestLogs);
+    setIsPaused(false);
+    setUnreadCount(0);
+    setFollowLatest(true);
+
+    requestAnimationFrame(() => {
+      const el = containerRef.current;
+      if (!el) return;
+      el.scrollTop = el.scrollHeight;
+    });
+  }
+
   if (!import.meta.env.DEV) return null;
 
   return (
@@ -250,9 +277,23 @@ export function DevLogPanel() {
       <div className="relative w-[500px] rounded-[24px] border border-white/60 bg-white/78 p-4 shadow-[0_16px_40px_rgba(0,0,0,0.12)] backdrop-blur-xl">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <div className="text-sm font-semibold tracking-[-0.01em] text-black">
-              Dev Log Panel
+            <div className="flex items-center gap-2">
+              <div className="text-sm font-semibold tracking-[-0.01em] text-black">
+                Dev Log Panel
+              </div>
+
+              <span
+                className={[
+                  "inline-flex rounded-full border px-2 py-0.5 text-[10px] font-semibold tracking-[0.06em]",
+                  isPaused
+                    ? "border-amber-500/15 bg-amber-500/10 text-amber-700"
+                    : "border-emerald-500/15 bg-emerald-500/10 text-emerald-700",
+                ].join(" ")}
+              >
+                {isPaused ? "PAUSED" : "LIVE"}
+              </span>
             </div>
+
             <div className="mt-1 text-xs text-black/55">
               Showing {filteredLogs.length} / {logs.length} logs
             </div>
@@ -266,6 +307,24 @@ export function DevLogPanel() {
             >
               Clear
             </button>
+
+            {isPaused ? (
+              <button
+                type="button"
+                onClick={handleResume}
+                className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1.5 text-[11px] font-medium text-emerald-700 transition hover:bg-emerald-500/15"
+              >
+                Resume
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setIsPaused(true)}
+                className="rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-1.5 text-[11px] font-medium text-amber-700 transition hover:bg-amber-500/15"
+              >
+                Pause
+              </button>
+            )}
 
             <button
               type="button"
@@ -368,13 +427,15 @@ export function DevLogPanel() {
               </div>
             </div>
 
-            {!followLatest && unreadCount > 0 ? (
+            {unreadCount > 0 ? (
               <button
                 type="button"
-                onClick={scrollToBottom}
+                onClick={isPaused ? handleResume : scrollToBottom}
                 className="absolute bottom-6 right-6 z-10 rounded-full border border-black/10 bg-white/95 px-3 py-1.5 text-[11px] font-medium text-black/75 shadow-lg transition hover:bg-black/[0.04]"
               >
-                ↓ Jump to latest ({unreadCount})
+                {isPaused
+                  ? `Resume to latest (${unreadCount})`
+                  : `↓ Jump to latest (${unreadCount})`}
               </button>
             ) : null}
 
